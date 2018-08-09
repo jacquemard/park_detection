@@ -1,0 +1,24 @@
+# Latex
+
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.pdf
+*.synctex.gz
+*.toc
+*.bbl
+*.bcf
+*.blg
+*.run.xml
+*.lof
+*.lot
+*.nlo
+*.out
+
+# VSCode
+*.vscode
+
+# Python
+*__pycache__*
+

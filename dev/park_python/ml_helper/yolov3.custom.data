@@ -1,0 +1,6 @@
+classes= 1
+train  = /home/ubuntu/DS/PKLot/tensorflow_ds/annotations/dn_train.txt
+valid  = /home/ubuntu/DS/PKLot/tensorflow_ds/annotations/dn_val.txt
+names = car.names
+backup = backup
+
