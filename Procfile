@@ -1,1 +1,1 @@
-web: gunicorn dev.park_python.rest_app
+web: gunicorn dev.park_python:stats_app
