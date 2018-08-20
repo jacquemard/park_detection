@@ -28,6 +28,8 @@ from ml_helper.tensorflow_api_predictor import TensorflowPredictor
 from flask import Flask, jsonify
 from skimage import io
 from time import gmtime, strftime
+import pymongo
+import datetime
 
 CAMERA_HOST = "ipcam.einet.ad.eivd.ch"
 USERNAME = "admin"
@@ -45,13 +47,30 @@ camera = CameraClient(CAMERA_HOST, USERNAME, PASSWORD)
 # Creating the tensorflow predictor
 predictor = TensorflowPredictor(MODEL_FILE)
 
-# Agent wich will be called to save park values
+# Database
+uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+client = pymongo.MongoClient(uri)
+stats = client['heig-park']['stats']
+
 values = []
+
+
+def add_db_value(value):
+    obj = {
+        "date": datetime.datetime.utcnow(),
+        "nb_cars": value
+    }
+
+    obj_id = stats.insert_one(obj).inserted_id
+    print("{} cars, stored within database with id {}".format(obj["nb_cars"], obj_id))
 
 def add_value(value):
     values.insert(0, value)
     if len(values) > VALUES_LENGTH:
         values.pop()
+
+    # adding to db
+    add_db_value(value)
 
 def current_num():
     if len(values) == 0:
