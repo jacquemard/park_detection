@@ -24,6 +24,7 @@ import pymongo
 import datetime
 import pytz
 import requests
+import os
 
 MAX_NUM_CARS = 23
 
@@ -33,7 +34,9 @@ VALUES_LENGTH = 4
 
 LOCAL_TIMEZONE = pytz.timezone("Europe/Zurich")
 
+print(os.environ)
 
+TELEGRAM_KEY = os.environ['TELEGRAM_KEY']
 
 # Database
 uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
@@ -104,7 +107,8 @@ def route_stats():
 
 @app.route("/bot", methods=["POST"])
 def telegram_bot_updates():
-    #print(request.get_json())
+    print("Telegram update received")
+    print(request.get_json())
     body = request.get_json()
     text = body['text']
 
@@ -128,7 +132,7 @@ def telegram_bot_updates():
             "text": msg
         }
 
-        requests.post("https://api.telegram.org/bot625265830:AAEYwsQ9tD0KrDAkC-EW5NGydWkpo1VyVq4/sendMessage", dict_msg)        
+        requests.post("https://api.telegram.org/bot{}/sendMessage".format(TELEGRAM_KEY), dict_msg)        
 
     if text.startswith('/start'):
         # sending a response to the user 
@@ -141,7 +145,7 @@ def telegram_bot_updates():
             "text": msg
         }
 
-        requests.post("https://api.telegram.org/bot625265830:AAEYwsQ9tD0KrDAkC-EW5NGydWkpo1VyVq4/sendMessage", dict_msg)     
+        requests.post("https://api.telegram.org/bot{}/sendMessage".format(TELEGRAM_KEY), dict_msg)     
 
     return '', 200
 
