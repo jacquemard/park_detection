@@ -18,7 +18,7 @@
 # }                                                              #
 ##################################################################
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request, abort
 from time import strftime, gmtime
 import pymongo
 import datetime
@@ -31,6 +31,7 @@ TIME_MEAN_SECONDS = 75
 VALUES_LENGTH = 4
 
 LOCAL_TIMEZONE = pytz.timezone("Europe/Zurich")
+
 
 
 # Database
@@ -99,6 +100,15 @@ def route_stats():
         })
 
     return jsonify(cur_stats)
+
+@app.route("/bot", methods=["POST"])
+def telegram_bot_updates():
+    print(request.get_json())
+    print("------")
+    print(request)
+    print("#####\n\n")
+
+    return '', 201
 
 if __name__ == '__main__':
     app.run(debug=True, port=80, host='0.0.0.0')
