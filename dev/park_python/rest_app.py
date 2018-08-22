@@ -104,7 +104,7 @@ def route_stats():
 
 @app.route("/bot", methods=["POST"])
 def telegram_bot_updates():
-    print(request.get_json())
+    #print(request.get_json())
     body = request.get_json()
     text = body['text']
 
@@ -121,7 +121,7 @@ def telegram_bot_updates():
         
         #occupied_rate = (MAX_NUM_CARS - free_place) / MAX_NUM_CARS
 
-        msg = "Il y a actuellement {} voitures présentes, pour environ {} places libres.".format(cur_num, free_place)
+        msg = "Il y a actuellement {0} voitures présentes, pour environ {1} places libres. Statut au {2}.".format(cur_num, free_place, cur_date.strftime("%d.%m.%y à %H:%M"))
 
         dict_msg = {
             "chat_id": chat_id,
@@ -129,6 +129,19 @@ def telegram_bot_updates():
         }
 
         requests.post("https://api.telegram.org/bot625265830:AAEYwsQ9tD0KrDAkC-EW5NGydWkpo1VyVq4/sendMessage", dict_msg)        
+
+    if text.startswith('/start'):
+        # sending a response to the user 
+        chat_id = body['chat']['id']
+
+        msg = "Tape '/status' pour avoir des infos sur le parking de la HEIG-VD !"
+
+        dict_msg = {
+            "chat_id": chat_id,
+            "text": msg
+        }
+
+        requests.post("https://api.telegram.org/bot625265830:AAEYwsQ9tD0KrDAkC-EW5NGydWkpo1VyVq4/sendMessage", dict_msg)     
 
     return '', 200
 
