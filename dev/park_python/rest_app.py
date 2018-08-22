@@ -23,6 +23,7 @@ from time import strftime, gmtime
 import pymongo
 import datetime
 import pytz
+import requests
 
 MAX_NUM_CARS = 23
 
@@ -104,11 +105,32 @@ def route_stats():
 @app.route("/bot", methods=["POST"])
 def telegram_bot_updates():
     print(request.get_json())
-    print("------")
-    print(request)
-    print("#####\n\n")
+    body = request.get_json()
+    text = body['text']
 
-    return '', 201
+    # /status command
+    if text.startswith('/status'):
+        # sending a response to the user 
+        chat_id = body['chat']['id']
+
+        cur_num, cur_date = current_cars()
+
+        free_place = MAX_NUM_CARS - cur_num
+        if free_place < 0:
+            free_place = 0
+        
+        #occupied_rate = (MAX_NUM_CARS - free_place) / MAX_NUM_CARS
+
+        msg = "Il y a actuellement {} voitures présentes, pour environ {} places libres.".format(cur_num, free_place)
+
+        dict_msg = {
+            "chat_id": chat_id,
+            "text": msg
+        }
+
+        requests.post("https://api.telegram.org/bot625265830:AAEYwsQ9tD0KrDAkC-EW5NGydWkpo1VyVq4/sendMessage", dict_msg)        
+
+    return '', 200
 
 if __name__ == '__main__':
     app.run(debug=True, port=80, host='0.0.0.0')
