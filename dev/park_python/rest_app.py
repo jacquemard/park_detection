@@ -18,43 +18,23 @@
 # }                                                              #
 ##################################################################
 
-from pathlib import Path
-import os
-import sys
-cur_path = Path(os.path.abspath(__file__))
-
-from camera.capture import CameraClient, CameraAgent
-from ml_helper.tensorflow_api_predictor import TensorflowPredictor
 from flask import Flask, jsonify
-from skimage import io
-from time import gmtime, strftime
+from time import strftime, gmtime
 import pymongo
 import datetime
-
-CAMERA_HOST = "ipcam.einet.ad.eivd.ch"
-USERNAME = "admin"
-PASSWORD = "Lfg3hgPhLdNYW"
-
-MODEL_FILE = str(cur_path.parent.resolve()) + "/final_models/tensorflow/pklotfull_4000_frozen_graph.pb"
 
 MAX_NUM_CARS = 23
 
 VALUES_LENGTH = 4
-
-# Creating a camera client
-camera = CameraClient(CAMERA_HOST, USERNAME, PASSWORD)
-
-# Creating the tensorflow predictor
-predictor = TensorflowPredictor(MODEL_FILE)
 
 # Database
 uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 client = pymongo.MongoClient(uri)
 stats = client['heig-park']['stats']
 
-values = []
+# values = []
 
-
+"""
 def add_db_value(value):
     obj = {
         "date": datetime.datetime.utcnow(),
@@ -71,21 +51,17 @@ def add_value(value):
 
     # adding to db
     add_db_value(value)
+"""
 
 def current_num():
+    # getting last 4 values from db
+    values = stats.find().sort("date",pymongo.DESCENDING).limit(4)
+
     if len(values) == 0:
         return 0
 
-    return round(sum(values) / len(values))
+    return round(sum(map(lambda val : val['nb_cars'], values)) / len(values))
 
-def image_received(image):
-    image = io.imread(image)
-    num_cars = predictor.predict_num_cars(image)
-    add_value(num_cars)
-
-    print("image received, num_car: {}, mean: {}".format(num_cars, current_num()))
-
-agent = CameraAgent(camera, image_received, seconds=15, blocking=False)
 
 app = Flask(__name__)
 
@@ -106,8 +82,6 @@ def root():
         'occupied_rate': occupied_rate
     }
     return jsonify(obj)
-
-agent.start()
 
 if __name__ == '__main__':
     app.run(debug=False, port=80, host='0.0.0.0')
