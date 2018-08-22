@@ -70,7 +70,7 @@ def current_cars():
 app = Flask(__name__)
 
 @app.route("/")
-def root():
+def route_current():
     cur_num, cur_date = current_cars()
 
     free_place = MAX_NUM_CARS - cur_num
@@ -87,5 +87,18 @@ def root():
     }
     return jsonify(obj)
 
+@app.route("/stats")
+def route_stats():
+    db_stats = stats.find().sort("date")
+
+    cur_stats = []
+    for stat in db_stats:
+        cur_stats.append({
+            "date": str(stat["date"].astimezone(LOCAL_TIMEZONE)),
+            "nb_cars": stat["nb_cars"]
+        })
+
+    return jsonify(cur_stats)
+
 if __name__ == '__main__':
-    app.run(debug=False, port=80, host='0.0.0.0')
+    app.run(debug=True, port=80, host='0.0.0.0')
