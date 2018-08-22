@@ -109,7 +109,7 @@ def route_stats():
 def telegram_bot_updates():
     print("Telegram update received")
     print(request.get_json())
-    body = request.get_json()
+    body = request.get_json()['message']
     text = body['text']
 
     # /status command
