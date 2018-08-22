@@ -138,7 +138,7 @@ def telegram_bot_updates():
         # sending a response to the user 
         chat_id = body['chat']['id']
 
-        msg = "Tape '/status' pour avoir des infos sur le parking de la HEIG-VD !"
+        msg = "Salut! Tape '/status' pour avoir des infos sur le parking de la HEIG-VD !"
 
         dict_msg = {
             "chat_id": chat_id,
