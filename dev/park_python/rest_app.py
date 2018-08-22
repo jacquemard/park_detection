@@ -22,52 +22,56 @@ from flask import Flask, jsonify
 from time import strftime, gmtime
 import pymongo
 import datetime
+import pytz
 
 MAX_NUM_CARS = 23
 
+TIME_MEAN_SECONDS = 75
+
 VALUES_LENGTH = 4
+
+LOCAL_TIMEZONE = pytz.timezone("Europe/Zurich")
+
 
 # Database
 uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 client = pymongo.MongoClient(uri)
 stats = client['heig-park']['stats']
 
-# values = []
 
-"""
-def add_db_value(value):
-    obj = {
-        "date": datetime.datetime.utcnow(),
-        "nb_cars": value
-    }
-
-    obj_id = stats.insert_one(obj).inserted_id
-    print("{} cars, stored within database with id {}".format(obj["nb_cars"], obj_id))
-
-def add_value(value):
-    values.insert(0, value)
-    if len(values) > VALUES_LENGTH:
-        values.pop()
-
-    # adding to db
-    add_db_value(value)
-"""
-
-def current_num():
+def current_cars():
     # getting last 4 values from db
-    values = stats.find().sort("date",pymongo.DESCENDING).limit(4)
+    # values = stats.find().sort("date",pymongo.DESCENDING).limit(VALUES_LENGTH)
 
-    if len(values) == 0:
-        return 0
+    # getting last minute from db
+    values = stats.find({
+        "date":{
+            "$gte": datetime.datetime.utcnow() - datetime.timedelta(seconds=TIME_MEAN_SECONDS)
+        }
+    }).sort("date",pymongo.DESCENDING).limit(VALUES_LENGTH)
 
-    return round(sum(map(lambda val : val['nb_cars'], values)) / len(values))
+    val_sum = 0
+    length = 0
+
+    val_date = None
+    for value in values:
+        val_sum += value['nb_cars']
+
+        if val_date == None or val_date < value['date']:
+            val_date = value['date']
+
+        length += 1
+
+
+    return (round(val_sum / length), val_date)
+    
 
 
 app = Flask(__name__)
 
 @app.route("/")
 def root():
-    cur_num = current_num()
+    cur_num, cur_date = current_cars()
 
     free_place = MAX_NUM_CARS - cur_num
     if free_place < 0:
@@ -76,7 +80,7 @@ def root():
     occupied_rate = (MAX_NUM_CARS - free_place) / MAX_NUM_CARS
 
     obj = {
-        'date':strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+        'date':str(cur_date.astimezone(LOCAL_TIMEZONE)),
         'num_cars': cur_num, 
         'free_place': free_place,
         'occupied_rate': occupied_rate
