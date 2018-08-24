@@ -119,6 +119,8 @@ def telegram_bot_updates():
 
         cur_num, cur_date = current_cars()
 
+        cur_date = cur_date.astimezone(LOCAL_TIMEZONE)
+
         free_place = MAX_NUM_CARS - cur_num
         if free_place < 0:
             free_place = 0
