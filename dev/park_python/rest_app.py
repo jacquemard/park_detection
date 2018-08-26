@@ -102,7 +102,7 @@ def route_stats():
     cur_stats = []
     index = 0
     for stat in db_stats:
-        if index % 12 == 0:
+        if index % 40 == 0:
             cur_stats.append({
                 "date": str(stat["date"].astimezone(LOCAL_TIMEZONE)),
                 "nb_cars": stat["nb_cars"]
