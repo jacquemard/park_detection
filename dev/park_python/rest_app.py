@@ -96,8 +96,8 @@ def route_current():
 
 @app.route("/stats")
 def route_stats():
-    # stats per 5 minute only
-    db_stats = stats.find().sort("date", pymongo.DESCENDING).limit(500)
+    # stats per 10 minute only
+    db_stats = stats.find().sort("date", pymongo.DESCENDING)
 
     cur_stats = []
     index = 0
