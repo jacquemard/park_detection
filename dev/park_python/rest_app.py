@@ -96,7 +96,7 @@ def route_current():
 
 @app.route("/stats")
 def route_stats():
-    db_stats = stats.find().sort("date")
+    db_stats = stats.find().sort("date").limit(100)
 
     cur_stats = []
     for stat in db_stats:
