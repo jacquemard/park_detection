@@ -52,7 +52,7 @@ def current_cars():
         "date":{
             "$gte": datetime.datetime.utcnow() - datetime.timedelta(seconds=TIME_MEAN_SECONDS)
         }
-    }).sort("date",pymongo.DESCENDING).limit(VALUES_LENGTH)
+    }).sort("date", pymongo.DESCENDING).limit(VALUES_LENGTH)
 
     val_sum = 0
     length = 0
@@ -96,14 +96,18 @@ def route_current():
 
 @app.route("/stats")
 def route_stats():
-    db_stats = stats.find().sort("date").limit(100)
+    # stats per 5 minute only
+    db_stats = stats.find().sort("date", pymongo.DESCENDING).limit(500)
 
     cur_stats = []
+    index = 0
     for stat in db_stats:
-        cur_stats.append({
-            "date": str(stat["date"].astimezone(LOCAL_TIMEZONE)),
-            "nb_cars": stat["nb_cars"]
-        })
+        if index % 12 == 0:
+            cur_stats.append({
+                "date": str(stat["date"].astimezone(LOCAL_TIMEZONE)),
+                "nb_cars": stat["nb_cars"]
+            })
+        index += 1
 
     return jsonify(cur_stats)
 
