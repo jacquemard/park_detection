@@ -25,6 +25,7 @@ import datetime
 import pytz
 import requests
 import os
+from flask_cors import CORS
 
 MAX_NUM_CARS = 23
 
@@ -33,8 +34,6 @@ TIME_MEAN_SECONDS = 75
 VALUES_LENGTH = 4
 
 LOCAL_TIMEZONE = pytz.timezone("Europe/Zurich")
-
-print(os.environ)
 
 TELEGRAM_KEY = os.environ['TELEGRAM_KEY']
 
@@ -73,6 +72,9 @@ def current_cars():
 
 
 app = Flask(__name__)
+
+# Enabling CORS 
+CORS(app)
 
 @app.route("/")
 def route_current():
