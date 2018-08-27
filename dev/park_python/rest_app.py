@@ -70,11 +70,14 @@ def current_cars():
     return (round(val_sum / length), val_date)
     
 def get_stats():
-    db_stats = stats.find().sort("date", pymongo.ASCENDING)
-    
-    cur_stats = []
-    for stat in db_stats:
-        cur_stats.append(stat)
+    db_stats = stats.find()#.sort("date", pymongo.ASCENDING)
+    db_stats.batch_size(1000)
+
+    cur_stats = list(db_stats)
+
+    #cur_stats = []
+    #for stat in db_stats:
+    #    cur_stats.append(stat)
 
     return cur_stats
 
@@ -97,6 +100,9 @@ def update_stats_mem():
     for stat in values:
         stats_mem.append(stat)
 
+app = Flask(__name__)
+CORS(app) # Enabling CORS 
+
 @app.route("/")
 def route_current():
     cur_num, cur_date = current_cars()
@@ -115,8 +121,6 @@ def route_current():
     }
     return jsonify(obj)
 
-app = Flask(__name__)
-CORS(app) # Enabling CORS 
 
 @app.route("/stats")
 def route_stats():
