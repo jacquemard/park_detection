@@ -115,6 +115,9 @@ def route_current():
     }
     return jsonify(obj)
 
+app = Flask(__name__)
+CORS(app) # Enabling CORS 
+
 @app.route("/stats")
 def route_stats():
     # firstly, updating stats_mem
@@ -181,8 +184,6 @@ def telegram_bot_updates():
 
     return '', 200
 
-app = Flask(__name__)
-CORS(app) # Enabling CORS 
 
 if __name__ == '__main__':
     app.run(debug=True, port=80, host='0.0.0.0')
