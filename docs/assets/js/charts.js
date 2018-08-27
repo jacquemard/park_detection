@@ -30,7 +30,8 @@ $(document).ready(function () {
         // Updating the text
         parkText.innerHTML = "Il y a actuellement <span class='text-error'>" + data['num_cars'] + "</span> voitures présentes sur le parking."
         console.log(Date.parse(data['date']))
-        parkTextDate.innerText = Date.parse(data['date']).toLocaleString()
+        d = data['date'].replace(" ", "T")
+        parkTextDate.innerText = new Date(Date.parse(d)).toLocaleString()
     });
 });
 
