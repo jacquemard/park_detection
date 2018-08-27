@@ -1,26 +1,89 @@
+let main = echarts.init(document.getElementById('ch-main'));
+let parkText = document.getElementById('park-text')
+let parkTextDate = document.getElementById('park-text-date')
+
+$(document).ready(function () {
+    $.ajax({
+        url: "https://heig-park.herokuapp.com/"
+    }).then(function (data) {
+        // specify chart configuration item and data
+        let option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b} : {c} ({d}%)"
+            },
+            series: [
+                {
+                    type: 'pie',
+                    data: [
+                        { name: 'Places libres', value: data['free_place'], itemStyle:{color: '#096'} },
+                        { name: 'Places occupées', value: data['num_cars'], itemStyle:{color: '#cc0033'} }
+                    ],
+                    name: 'Nombre de places'
+                }
+            ]
+        };
+
+        // use configuration item and data specified to show chart
+        main.setOption(option);
+        
+        // Updating the text
+        parkText.innerHTML = "Il y a actuellement <span class='text-error'>" + data['num_cars'] + "</span> voitures présentes sur le parking."
+        console.log(Date.parse(data['date']))
+        parkTextDate.innerText = Date.parse(data['date']).toLocaleString()
+    });
+});
+
+
+
+let stats = echarts.init(document.getElementById('ch-stats'));
+stats.showLoading()
+
+let data_base = []
+let data_zero = []
+
 // Get bases values from REST API
 $(document).ready(function () {
     $.ajax({
         url: "https://heig-park.herokuapp.com/stats"
     }).then(function (data) {
-        $('.greeting-id').append(data.id);
-        $('.greeting-content').append(data.content);
-
-        // based on prepared DOM, initialize echarts instance
-        var myChart = echarts.init(document.getElementById('ch-main'));
-
-        console.log(data);
+        stats.hideLoading();
 
         // specify chart configuration item and data
-        var option = {
+        let option = {
             tooltip: {},
             dataset: {
-                dimensions: ['date', 'nb_cars'],
+                //dimensions: ['date', 'nb_cars', 'nb_cars'],
                 source: data
             },
-            xAxis: {type: 'time'},
-            yAxis: {},
-            series: [{type: 'line'}],
+            xAxis: { type: 'time' },
+            yAxis: { type: 'value' },
+            series: [
+                {
+                    type: 'bar',
+                    encode: {
+                        x: 'date',
+                        y: 'nb_cars'
+                    },
+                    markPoint: {
+                        data: [
+                            { type: 'max', name: 'Max' },
+                        ]
+                    },
+                    itemStyle: {
+                    },
+                    large: true,
+                    barGap: '0%',
+                    name: 'Nombre de voitures'
+                },
+                {
+                    type: 'scatter',
+                    encode: {
+                        x: 'date',
+                        y: 'nb_cars'
+                    }
+                }
+            ],
             dataZoom: [
                 {   // this dataZoom component controls x-axis by dafault
                     type: 'slider', // this dataZoom component is dataZoom component of slider
@@ -32,25 +95,25 @@ $(document).ready(function () {
                 top: 10,
                 right: 10,
                 pieces: [{
+                    gte: 0,
+                    lte: 0,
+                    color: ' #b3ffe6'
+                }, {
                     gt: 0,
                     lte: 5,
                     color: '#096'
                 }, {
                     gt: 5,
-                    lte: 10,
-                    color: '#ffde33'
-                }, {
-                    gt: 10,
                     lte: 15,
-                    color: '#ff9933'
+                    color: '#ffde33'
                 }, {
                     gt: 15,
                     lte: 20,
-                    color: '#cc0033'
+                    color: '#ff9933'
                 }, {
                     gt: 20,
                     lte: 25,
-                    color: '#660099'
+                    color: '#cc0033'
                 }, {
                     gt: 25,
                     color: '#7e0023'
@@ -62,7 +125,7 @@ $(document).ready(function () {
         };
 
         // use configuration item and data specified to show chart
-        myChart.setOption(option);
+        stats.setOption(option);
     });
 });
 
