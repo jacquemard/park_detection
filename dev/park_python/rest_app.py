@@ -43,9 +43,6 @@ client = pymongo.MongoClient(uri)
 stats = client['heig-park']['stats']
 #stats.create_index([('date', pymongo.ASCENDING)], unique=True)
 
-app = Flask(__name__)
-CORS(app) # Enabling CORS 
-
 def current_cars():
     # getting last 4 values from db
     # values = stats.find().sort("date",pymongo.DESCENDING).limit(VALUES_LENGTH)
@@ -183,6 +180,9 @@ def telegram_bot_updates():
         requests.post("https://api.telegram.org/bot{}/sendMessage".format(TELEGRAM_KEY), dict_msg)     
 
     return '', 200
+
+app = Flask(__name__)
+CORS(app) # Enabling CORS 
 
 if __name__ == '__main__':
     app.run(debug=True, port=80, host='0.0.0.0')
