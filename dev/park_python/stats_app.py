@@ -31,6 +31,8 @@ MAX_NUM_CARS = 23
 
 VALUES_LENGTH = 4
 
+AZURE_KEY = os.environ['AZURE_KEY'] 
+
 # Creating a camera client
 camera = CameraClient(CAMERA_HOST, USERNAME, PASSWORD)
 
@@ -38,7 +40,7 @@ camera = CameraClient(CAMERA_HOST, USERNAME, PASSWORD)
 predictor = TensorflowPredictor(MODEL_FILE)
 
 # Database
-uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+uri = "mongodb://heig-park:{}@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb".format(AZURE_KEY)
 client = pymongo.MongoClient(uri)
 stats = client['heig-park']['stats']
 

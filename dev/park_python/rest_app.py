@@ -36,9 +36,11 @@ VALUES_LENGTH = 20
 LOCAL_TIMEZONE = pytz.timezone("Europe/Zurich")
 
 TELEGRAM_KEY = os.environ['TELEGRAM_KEY']
+AZURE_KEY = os.environ['AZURE_KEY'] 
+
 
 # Database
-uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
+uri = "mongodb://heig-park:{}@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb".format(AZURE_KEY)
 client = pymongo.MongoClient(uri)
 stats = client['heig-park']['stats']
 #stats.create_index([('date', pymongo.ASCENDING)], unique=True)
@@ -70,7 +72,7 @@ def current_cars():
     return (round(val_sum / length), val_date)
     
 def get_stats():
-    db_stats = stats.find()#.sort("date", pymongo.ASCENDING)
+    db_stats = stats.find()#.sort("date", pymongo.ASCENDING)    cursor_type=pymongo.CursorType.EXHAUST
     db_stats.batch_size(1000)
 
     cur_stats = list(db_stats)
