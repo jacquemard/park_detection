@@ -16,8 +16,8 @@ $(document).ready(function () {
                 {
                     type: 'pie',
                     data: [
-                        { name: 'Places libres', value: data['free_place'], itemStyle:{color: '#096'} },
-                        { name: 'Places occupées', value: data['num_cars'], itemStyle:{color: '#cc0033'} }
+                        { name: 'libres', value: data['free_place'], itemStyle:{color: '#096'} },
+                        { name: 'occupés', value: data['num_cars'], itemStyle:{color: '#cc0033'} }
                     ],
                     name: 'Nombre de places'
                 }
@@ -60,7 +60,7 @@ $(document).ready(function () {
             yAxis: { type: 'value' },
             series: [
                 {
-                    type: 'bar',
+                    type: 'scatter',
                     encode: {
                         x: 'date',
                         y: 'nb_cars'
@@ -75,14 +75,14 @@ $(document).ready(function () {
                     large: true,
                     barGap: '0%',
                     name: 'Nombre de voitures'
-                },
+                }/*,
                 {
                     type: 'scatter',
                     encode: {
                         x: 'date',
                         y: 'nb_cars'
                     }
-                }
+                }*/
             ],
             dataZoom: [
                 {   // this dataZoom component controls x-axis by dafault
