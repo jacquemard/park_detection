@@ -31,7 +31,7 @@ MAX_NUM_CARS = 23
 
 TIME_MEAN_SECONDS = 75
 
-VALUES_LENGTH = 4
+VALUES_LENGTH = 20
 
 LOCAL_TIMEZONE = pytz.timezone("Europe/Zurich")
 
@@ -41,7 +41,10 @@ TELEGRAM_KEY = os.environ['TELEGRAM_KEY']
 uri = "mongodb://heig-park:rl5N71ZE5Lvid9MA1lA4O03e7TKDIgA47cuwrcjsN08PAgBrQBrYBOAdPvCqGlHTqbrxHofatBvNoAF0hb9tDQ==@heig-park.documents.azure.com:10255/?ssl=true&replicaSet=globaldb"
 client = pymongo.MongoClient(uri)
 stats = client['heig-park']['stats']
+#stats.create_index([('date', pymongo.ASCENDING)], unique=True)
 
+app = Flask(__name__)
+CORS(app) # Enabling CORS 
 
 def current_cars():
     # getting last 4 values from db
@@ -69,12 +72,33 @@ def current_cars():
 
     return (round(val_sum / length), val_date)
     
+def get_stats():
+    db_stats = stats.find().sort("date", pymongo.ASCENDING)
+    
+    cur_stats = []
+    for stat in db_stats:
+        cur_stats.append(stat)
 
+    return cur_stats
 
-app = Flask(__name__)
+# firstly loading stats in memory
+print("Loading stats")
+stats_mem = get_stats()
 
-# Enabling CORS 
-CORS(app)
+print("Stats loaded")
+
+def last_date():
+    return stats_mem[len(stats_mem) - 1]['date']
+
+def update_stats_mem():
+    values = stats.find({
+        "date":{
+            "$gt":last_date()
+        }
+    }).sort("date", pymongo.ASCENDING)
+
+    for stat in values:
+        stats_mem.append(stat)
 
 @app.route("/")
 def route_current():
@@ -96,13 +120,16 @@ def route_current():
 
 @app.route("/stats")
 def route_stats():
-    # stats per 10 minute only
-    db_stats = stats.find().sort("date", pymongo.DESCENDING)
+    # firstly, updating stats_mem
+    update_stats_mem()
 
+    #db_stats = stats.find().sort("date", pymongo.DESCENDING)
+
+    # stats per 10 minute only
     cur_stats = []
     index = 0
-    for stat in db_stats:
-        if index % 40 == 0:
+    for stat in stats_mem:
+        if index % VALUES_LENGTH == 0:
             cur_stats.append({
                 "date": str(stat["date"].astimezone(LOCAL_TIMEZONE)),
                 "nb_cars": stat["nb_cars"]
