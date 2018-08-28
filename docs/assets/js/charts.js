@@ -2,9 +2,10 @@ let main = echarts.init(document.getElementById('ch-main'));
 let parkText = document.getElementById('park-text')
 let parkTextDate = document.getElementById('park-text-date')
 
-$(document).ready(function () {
+function load_main() {
     $.ajax({
-        url: "https://heig-park.herokuapp.com/"
+        url: "https://heig-park.herokuapp.com/",
+        timeout: 10000
     }).then(function (data) {
         // specify chart configuration item and data
         let option = {
@@ -32,34 +33,37 @@ $(document).ready(function () {
         console.log(Date.parse(data['date']))
         d = data['date'].replace(" ", "T")
         parkTextDate.innerText = new Date(Date.parse(d)).toLocaleString()
-    });
-});
 
-setInterval(() => {
-    $.ajax({
-        url: "https://heig-park.herokuapp.com/"
-    }).then(function (data) {
-        // specify chart configuration item and data
-        let option = {
-            series: [
-                {
-                    data: [
-                        { name: 'libres', value: data['free_place'], itemStyle: { color: '#096' } },
-                        { name: 'occupés', value: data['num_cars'], itemStyle: { color: '#cc0033' } }
+        // Live
+        setInterval(() => {
+            $.ajax({
+                url: "https://heig-park.herokuapp.com/"
+            }).then(function (data) {
+                // specify chart configuration item and data
+                let option = {
+                    series: [
+                        {
+                            data: [
+                                { name: 'libres', value: data['free_place'], itemStyle: { color: '#096' } },
+                                { name: 'occupés', value: data['num_cars'], itemStyle: { color: '#cc0033' } }
+                            ]
+                        }
                     ]
-                }
-            ]
-        };
-
-        // use configuration item and data specified to show chart
-        main.setOption(option);
-
-        // Updating the text
-        parkText.innerHTML = "Il y a actuellement <span class='text-error'>" + data['num_cars'] + "</span> voitures présentes sur le parking."
-        d = data['date'].replace(" ", "T")
-        parkTextDate.innerText = new Date(Date.parse(d)).toLocaleString()
+                };
+        
+                // use configuration item and data specified to show chart
+                main.setOption(option);
+        
+                // Updating the text
+                parkText.innerHTML = "Il y a actuellement <span class='text-error'>" + data['num_cars'] + "</span> voitures présentes sur le parking."
+                d = data['date'].replace(" ", "T")
+                parkTextDate.innerText = new Date(Date.parse(d)).toLocaleString()
+            });
+        }, 15000)        
+    }).catch(() => {
+        load_main()
     });
-}, 15000)
+}
 
 
 let stats = echarts.init(document.getElementById('ch-stats'));
@@ -159,6 +163,7 @@ function load_stats() {
 
 // Get bases values from REST API
 $(document).ready(function () {
+    load_main()
     load_stats()
 });
 
