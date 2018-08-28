@@ -16,8 +16,8 @@ $(document).ready(function () {
                 {
                     type: 'pie',
                     data: [
-                        { name: 'libres', value: data['free_place'], itemStyle:{color: '#096'} },
-                        { name: 'occupés', value: data['num_cars'], itemStyle:{color: '#cc0033'} }
+                        { name: 'libres', value: data['free_place'], itemStyle: { color: '#096' } },
+                        { name: 'occupés', value: data['num_cars'], itemStyle: { color: '#cc0033' } }
                     ],
                     name: 'Nombre de places'
                 }
@@ -26,7 +26,7 @@ $(document).ready(function () {
 
         // use configuration item and data specified to show chart
         main.setOption(option);
-        
+
         // Updating the text
         parkText.innerHTML = "Il y a actuellement <span class='text-error'>" + data['num_cars'] + "</span> voitures présentes sur le parking."
         console.log(Date.parse(data['date']))
@@ -35,6 +35,31 @@ $(document).ready(function () {
     });
 });
 
+setInterval(() => {
+    $.ajax({
+        url: "https://heig-park.herokuapp.com/"
+    }).then(function (data) {
+        // specify chart configuration item and data
+        let option = {
+            series: [
+                {
+                    data: [
+                        { name: 'libres', value: data['free_place'], itemStyle: { color: '#096' } },
+                        { name: 'occupés', value: data['num_cars'], itemStyle: { color: '#cc0033' } }
+                    ]
+                }
+            ]
+        };
+
+        // use configuration item and data specified to show chart
+        main.setOption(option);
+
+        // Updating the text
+        parkText.innerHTML = "Il y a actuellement <span class='text-error'>" + data['num_cars'] + "</span> voitures présentes sur le parking."
+        d = data['date'].replace(" ", "T")
+        parkTextDate.innerText = new Date(Date.parse(d)).toLocaleString()
+    });
+}, 15000)
 
 
 let stats = echarts.init(document.getElementById('ch-stats'));
@@ -43,10 +68,10 @@ stats.showLoading()
 let data_base = []
 let data_zero = []
 
-// Get bases values from REST API
-$(document).ready(function () {
+function load_stats() {
     $.ajax({
-        url: "https://heig-park.herokuapp.com/stats"
+        url: "https://heig-park.herokuapp.com/stats",
+        timeout: 10000
     }).then(function (data) {
         stats.hideLoading();
 
@@ -127,6 +152,13 @@ $(document).ready(function () {
 
         // use configuration item and data specified to show chart
         stats.setOption(option);
+    }).catch(function (e) {
+        load_stats()
     });
+}
+
+// Get bases values from REST API
+$(document).ready(function () {
+    load_stats()
 });
 
